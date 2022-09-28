@@ -17,7 +17,7 @@ dependencies:
     - channels>=2.0
     - channels-redis
     - daphne
-    - django-bootstrap4
+    - django-bootstrap5
     - django-redis
     - grip
     - pytest-django

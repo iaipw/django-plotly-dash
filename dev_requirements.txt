@@ -6,7 +6,7 @@ channels-redis
 daphne
 dash-bootstrap-components
 Django>=2.0
-django-bootstrap4
+django-bootstrap5
 django-redis
 dpd-static-support>=0.0.4
 grip
