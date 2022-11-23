@@ -34,7 +34,8 @@ from django.core.cache import cache
 from django.utils.module_loading import import_string
 
 from django_plotly_dash._patches import DjangoPlotlyJSONEncoder
-
+import sys
+import importlib.util
 
 def _get_settings():
     try:
@@ -140,5 +141,27 @@ def stateless_app_lookup_hook():
 
     # Default is no additional lookup
     return lambda _: None
+
+def bootstrap_version():
+    'Specify version of djang_bootstrap that needs to be loaded'
+    bootstrap_version = _get_settings().get('bootstrap_version',4)
+
+    django_bootstrap_modules = {
+        4:'bootstrap4',
+        5:'django_bootstrap5'
+    }
+    if (bootstrap_version in django_bootstrap_modules):
+        package_name = f'django-bootstrap{bootstrap_version}'
+        spec = importlib.util.find_spec(package_name)
+        if spec is None:
+            raise Exception(f'bootstrap_version={bootstrap_version} is set in settings.PLOTLY_DASH, however {package_name} is not installed')
+        
+        if (django_bootstrap_modules[bootstrap_version] not in sys.modules):
+            raise Exception(f'bootstrap_version={bootstrap_version} is set in settings.PLOTLY_DASH, however {django_bootstrap_modules[bootstrap_version]} not imported')
+
+        if django_bootstrap_modules[bootstrap_version] not in settings.INSTALLED_APPS:
+            raise Exception(f'bootstrap_version={bootstrap_version} specified in settings.PLOTLY_DASH, however settings.INSTALLED_APPS does not have the entry {django_bootstrap_modules[bootstrap_version]}')
+
+
 
 

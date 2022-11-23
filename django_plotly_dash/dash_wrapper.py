@@ -42,6 +42,7 @@ from .middleware import EmbeddedHolder
 from .util import serve_locally as serve_locally_setting
 from .util import stateless_app_lookup_hook
 from .util import static_asset_path, DjangoPlotlyJSONEncoder
+from .util import bootstrap_version as bootstrap_version_setting
 
 try:
     from dataclasses import dataclass
@@ -191,8 +192,33 @@ class DjangoDash:
         self._suppress_callback_exceptions = suppress_callback_exceptions
 
         if add_bootstrap_links:
-            from bootstrap4.bootstrap import css_url
-            bootstrap_source = css_url()['href']
+            if bootstrap_version_setting() == 4:
+                from bootstrap4.bootstrap import css_url
+                bootstrap_source = css_url()['href']
+                
+            elif bootstrap_version_setting() == 5:
+                from django_bootstrap5.core import css_url
+
+                # seems that the index "href" changed to "url" from
+                # bootstrap4 at https://github.com/zostera/django-bootstrap4/blob/ac29094050058e80c74b4eb06e0d282278a2e19f/src/bootstrap4/bootstrap.py#L5
+                # BOOTSTRAP4_DEFAULTS = {
+                # "css_url": {
+                #     "href": "https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css",
+                #     "integrity": "sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N",
+                #     "crossorigin": "anonymous",
+                # },
+
+                # to
+                # 
+                # bootstrap5 at https://github.com/zostera/django-bootstrap5/blob/71d6564e97c0cacfd9dd0718190d6e902a0eb550/src/django_bootstrap5/core.py#L6
+                # BOOTSTRAP5_DEFAULTS = {
+                #     "css_url": {
+                #         "url": "https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css",
+                #         "integrity": "sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx",
+                #         "crossorigin": "anonymous",
+                #     }
+
+                bootstrap_source = css_url()['url']
 
             if self._serve_locally:
                 # Ensure package is loaded; if not present then pip install dpd-static-support
